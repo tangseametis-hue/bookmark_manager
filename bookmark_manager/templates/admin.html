@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>书签管理系统 - 统一管理后台</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; background-color: #f4f6f9; }
+        h1, h2 { color: #333; }
+        .card { background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+        th { background-color: #007bff; color: white; }
+        /* 修改前代码 GET 请求超链接样式
+        .btn-del { color: red; text-decoration: none; font-weight: bold; }
+        */
+        /* 修改后代码1 适配表单按钮样式，去除默认按钮边框与背景，保留红色文字外观 */
+        .btn-del { color: red; text-decoration: none; font-weight: bold; background: none; border: none; padding: 0; cursor: pointer; font-size: inherit; }
+        .nav { margin-bottom: 20px; }
+    </style>
+</head>
+<body>
+
+    <div class="nav">
+        <span>欢迎您，管理员 {{ session['username'] }} | </span>
+        <a href="{{ url_for('index') }}">前往普通首页</a> |
+        <a href="{{ url_for('logout') }}">退出登录</a>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div style="color: green; padding: 10px; margin-bottom: 10px;">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <h1>🛡️ 系统最高管理后台</h1>
+
+    <div class="card">
+        <h2>👥 全站注册用户列表 (共 {{ users|length }} 人)</h2>
+        <table>
+            <tr>
+                <th>用户 ID</th>
+                <th>用户名</th>
+                <th>电子邮箱</th>
+                <th>角色身份</th>
+            </tr>
+            {% for u in users %}
+            <tr>
+                <td>{{ u.id }}</td>
+                <td>{{ u.username }}</td>
+                <td>{{ u.email }}</td>
+                <td>{% if u.is_admin %}<b style="color: red;">管理员</b>{% else %}普通用户{% endif %}</td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+
+    <div class="card">
+        <h2>🔖 全站书签一览与强制限流 (共 {{ bookmarks|length }} 个)</h2>
+        <table>
+            <tr>
+                <th>书签 ID</th>
+                <th>书签标题</th>
+                <th>链接 URL</th>
+                <th>所属用户 ID</th>
+                <th>操作</th>
+            </tr>
+            {% for b in bookmarks %}
+            <tr>
+                <td>{{ b.id }}</td>
+                <td>{{ b.title }}</td>
+                <td><a href="{{ b.url }}" target="_blank">{{ b.url }}</a></td>
+                <td>用户 {{ b.user_id }}</td>
+                <td>
+                    <!--2修改前代码 GET 请求方式删除书签，存在严重的 CSRF 跨站请求伪造漏洞
+                    <a href="{{ url_for('admin_delete_bookmark', id=b.id) }}" class="btn-del" onclick="return confirm('确定要强行删除该用户的书签吗？')">强行删除</a>
+                    -->
+                    <!--修改后代码1 将删除操作改为 POST 表单提交，并注入 csrf_token 隐藏域以防范 CSRF 攻击 -->
+                    <form action="{{ url_for('admin_delete_bookmark', id=b.id) }}" method="POST" style="display:inline;" onsubmit="return confirm('确定要强行删除该用户的书签吗？');">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                        <button type="submit" class="btn-del">强行删除</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+
+</body>
+</html>
