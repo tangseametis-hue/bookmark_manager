@@ -5,6 +5,3 @@
 ### 🔖 书签管理器 (Bookmark Manager)
 * **[bookmark_manager (最新重构版)](https://github.com/tangseametis-hue/bookmark_manager)**：核心源码与最新功能实现。
 * **[bookmark_manager-v1 (初始版本)](https://github.com/tangseametis-hue/bookmark_manager-v1)**：早期初版代码，仅供对比参考。
-
-### 🛡️ 网络安全 / 学习笔记
-* *(后续有新项目可以随时在这里补充链接)*
